@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css" />
+    <style>
+        .awesomplete {
+            display: inline-block;
+            width: 30%;
+        }
+    </style>
+    <style>
+        .weather-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .forecast-image {
+            width: 50px;
+            height: 50px;
+        }
+        .recent-searches {
+            list-style: none;
+            padding: 0;
+        }
+        .recent-searches li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Welcome to the Weather App</h1>
+        
+        <!-- Search Bar -->
+        <div class="text-center mb-4">
+            <form action="/weather" method="POST" class="d-flex justify-content-center">
+                <input type="text" id="search-city" name="loc" class="form-control me-2" placeholder="Enter city name" required>
+                <button type="submit" class="btn btn-primary">Search</button>
+                <input type="hidden" name="lng" id="lng">
+                <input type="hidden" name="lat" id="lat">
+            </form>
+        </div>
+        
+        <!-- Current Location Weather -->
+        <div id="weather-container">
+            <p class="text-center text-muted">Enable location to view your current weather.</p>
+        </div>
+
+        <!-- Recent Searches -->
+        <div class="mt-4">
+            <h2 class="text-center">Recent Searches</h2>
+            <% if (recentSearches && recentSearches.length > 0) { %>
+                <ul class="recent-searches text-center">
+                    <% recentSearches.forEach(search => { %>
+                        <li>
+                            <a href="/weather?lat=<%= search.lat%>&lng=<%= search.lng%>&loc=<%= encodeURIComponent(search.loc)%>" class="btn btn-link"><%= search.loc %></a>
+                                <small>(<%= friendlyDate(search.timestamp) %>)</small>
+                        </li>
+                    <% }); %>
+                </ul>
+            <% } else { %>
+                <p class="text-center text-muted">No recent searches yet.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('search-city');
+            const awesomplete = new Awesomplete(input, {
+                minChars: 3,
+                autoFirst: true,
+                maxItems: 10
+            });
+            const locations = [];
+
+            input.addEventListener('input', async () => {
+                const query = input.value;
+                if (query.length < 3) return;
+
+                try {
+                    const response = await fetch(`/location?loc=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    locations.length = 0;
+                    const suggestions = data.results.map(location => {
+                        const loc = `${location.name}, ${location.admin1 || location.country}`;
+                        console.log(loc);
+                        return loc;
+                    }
+                    );
+                    data.results.forEach(l => {
+                        locations.push({
+                            loc: `${l.name}, ${l.admin1 || l.country}`,
+                            lat: l.latitude,
+                            lng: l.longitude
+                        })
+                    })
+                    console.log(locations);
+                    awesomplete.list = suggestions;
+                } catch (error) {
+                    console.error('Error fetching location suggestions:', error);
+                }
+            });
+
+            input.addEventListener('awesomplete-selectcomplete', (event) => {
+                const loc = locations.find(l => {
+                    return l.loc == event.text.value;
+                    
+                });
+                if (loc) {
+                    document.getElementById("lat").value = loc.lat;
+                    document.getElementById("lng").value = loc.lng;
+                }
+            });
+            const fetchWeatherForCurrentLocation = async () => {
+                // Check if the browser supports Geolocation API
+                if (!navigator.geolocation) {
+                    console.error('Geolocation is not supported by your browser.');
+                    return;
+                }
+
+                // Get the user's current location
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    console.log('Current location:', { latitude, longitude });
+
+                    try {
+                        // Call the weather API with the captured coordinates
+                        const response = await fetch(`/weather?json=1&lat=${latitude}&lng=${longitude}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error status: ${response.status}`);
+                        }
+                        const weatherData = await response.json();
+                        console.log('Weather data:', weatherData);
+
+                        // Display or process the weather data as needed
+                        displayWeatherData(weatherData);
+                    } catch (error) {
+                        console.error('Error fetching weather data:', error);
+                    }
+                }, (error) => {
+                    console.error('Error getting location:', error);
+                });
+            };
+
+            // Example function to display the weather data (customize as needed)
+            const displayWeatherData = (data) => {
+                const currentWeather = data.current;
+                const weatherDiv = document.getElementById('weather-container');
+                weatherDiv.innerHTML = `
+                    <div class="weather-card bg-light text-center mb-4">
+                    <h2>Current Weather at Your Location</h2>
+                    <img src="${currentWeather.weather.image}" alt="Weather Icon" class="img-fluid mb-2">
+                    <h3>${currentWeather.weather.description}</h3>
+                    <p>
+                        <strong>Temperature:</strong> ${currentWeather.temperature_2m} °F<br>
+                        <strong>Feels Like:</strong> ${currentWeather.apparent_temperature} °F<br>
+                        <strong>Humidity:</strong> ${currentWeather.relative_humidity_2m} %<br>
+                        <strong>Wind:</strong> ${currentWeather.wind_speed_10m} mph<br>
+                    </p>
+                </div>
+                `;
+            };
+
+            // Attach to a button or call directly
+            fetchWeatherForCurrentLocation();
+        });
+
+    </script>
+</body>
+</html>
+<%
+function friendlyDate(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+
+    // Format the time as "2:35pm"
+    const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
+    const timeString = date.toLocaleTimeString('en-US', optionsTime);
+
+    // Calculate the difference in days
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const daysDifference = Math.floor((startOfToday - date) / oneDayMs);
+
+    if (daysDifference <= 0) {
+        return `Today at ${timeString}`;
+    } else if (daysDifference === 1) {
+        return `Yesterday at ${timeString}`;
+    } else if (daysDifference < 7) {
+        // Format the weekday (e.g., "Thursday")
+        const optionsWeekday = { weekday: 'long' };
+        const dayString = date.toLocaleDateString('en-US', optionsWeekday);
+        return `${dayString} at ${timeString} - ${daysDifference}`;
+    } else {
+        // Format as "July 12"
+        const optionsDate = { month: 'long', day: 'numeric' };
+        const dateString = date.toLocaleDateString('en-US', optionsDate);
+        return `${dateString} at ${timeString}`;
+    }
+}
+%>
