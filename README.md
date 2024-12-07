@@ -15,9 +15,11 @@
     back to the homepage. Each user has a specific cookie id that tracks their session
     which is used to store and retrieve the recent searches in mongo.
 
-**YouTube Video Link:**
+    [https://weather-app-node-p1xu.onrender.com/] (https://weather-app-node-p1xu.onrender.com/)
+
+**YouTube Video Link:** https://youtu.be/7pM5iE9gZBM
 
 **APIs:** [open-meteo weather and forecast] (https://open-meteo.com/en/docs), 
     [open-meteo geocoding] (https://open-meteo.com/en/docs/geocoding-api)
-    
+
 **Contact Email:** theronwolcott@gmail.com
