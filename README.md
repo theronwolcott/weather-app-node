@@ -14,8 +14,7 @@
     for that location powered by open-meteo. You can click the blue button to go
     back to the homepage. Each user has a specific cookie id that tracks their session
     which is used to store and retrieve the recent searches in mongo.
-
-    [https://weather-app-node-p1xu.onrender.com/] (https://weather-app-node-p1xu.onrender.com/)
+    https://weather-app-node-p1xu.onrender.com/
 
 **YouTube Video Link:** https://youtu.be/7pM5iE9gZBM
 
