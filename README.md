@@ -1,6 +1,9 @@
-Submitted by: Theron Wolcott (twolcott)
-Group Members: Theron Wolcott (twolcott)
-App Description: My project is a weather app formatted using Bootstap. On the homepage, we have a search bar where 
+**Submitted by:** Theron Wolcott (twolcott)
+
+**Group Members:** Theron Wolcott (twolcott)
+
+**App Description:** My project is a weather app formatted using Bootstap. 
+    On the homepage, we have a search bar where 
     you can search for a location anywhere in the world. When you start typing more
     than two characters, the top ten autocompleted options show up using awesomplete library.
     Below the search bar is the current weather for your location, if location services 
@@ -11,7 +14,10 @@ App Description: My project is a weather app formatted using Bootstap. On the ho
     for that location powered by open-meteo. You can click the blue button to go
     back to the homepage. Each user has a specific cookie id that tracks their session
     which is used to store and retrieve the recent searches in mongo.
-YopTube Video Link:
-APIs: [open-meteo weather and forecast] (https://open-meteo.com/en/docs), 
+
+**YouTube Video Link:**
+
+**APIs:** [open-meteo weather and forecast] (https://open-meteo.com/en/docs), 
     [open-meteo geocoding] (https://open-meteo.com/en/docs/geocoding-api)
-Contact Email: theronwolcott@gmail.com
+    
+**Contact Email:** theronwolcott@gmail.com
